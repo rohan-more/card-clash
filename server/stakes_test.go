@@ -9,7 +9,7 @@ import (
 
 	"github.com/heroiclabs/nakama-common/runtime"
 
-	"github.com/rohan-more/Uno/server/game"
+	"github.com/rohan-more/card-clash/server/game"
 )
 
 // fakeBank keeps balances and escrow records in memory, all-or-nothing like

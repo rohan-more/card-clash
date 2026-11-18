@@ -7,7 +7,7 @@ import (
 
 	"github.com/heroiclabs/nakama-common/runtime"
 
-	"github.com/rohan-more/Uno/server/game"
+	"github.com/rohan-more/card-clash/server/game"
 )
 
 // Stakes: every seat pays in when a match starts, and the pot is paid out by

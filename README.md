@@ -1,7 +1,7 @@
-# Uno Multiplayer
+# Card Clash
 
-A four-player online Uno game: **Unity** client, **Nakama** game server with an
-authoritative match handler written in **Go**.
+A four-player online card game with Uno-style rules: **Unity** client,
+**Nakama** game server with an authoritative match handler written in **Go**.
 
 It started as a single-player prototype. The rules now live on the server, which
 deals the cards, decides what is legal and tells each client only what that
@@ -71,7 +71,7 @@ NakamaConnection  ──── RPC ──────────▶ find_match 
  MatchmakingPanel ◀─── LOBBY_STATE ───────────────┤
  MatchPresenter   ◀─── GAME_STATE, EVENTS, ───────┘
    ├─ MatchView        ERROR, REMOVED             │
-   ├─ MatchSeatsView                   game/ — pure Uno rules,
+   ├─ MatchSeatsView                   game/ — pure card-game rules,
    └─ ResultsView                      no Nakama imports
 ```
 
@@ -92,8 +92,8 @@ NakamaConnection  ──── RPC ──────────▶ find_match 
 ## Run it
 
 ```bash
-git clone https://github.com/rohan-more/Uno.git
-cd Uno
+git clone https://github.com/rohan-more/card-clash.git
+cd card-clash
 docker compose up -d --build
 ```
 
@@ -124,7 +124,7 @@ cd server && go test ./...
 
 ## Roadmap
 
-- [x] Uno rules engine in Go, with tests
+- [x] Rules engine in Go, with tests
 - [x] Device login, generated names (`SpryCrane15`) and avatars
 - [x] Matchmaking: lobbies, 12-second countdown, bots filling seats
 - [x] Dealing and per-player snapshots

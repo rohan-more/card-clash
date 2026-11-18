@@ -9,7 +9,7 @@ import (
 
 	"github.com/heroiclabs/nakama-common/runtime"
 
-	"github.com/rohan-more/Uno/server/game"
+	"github.com/rohan-more/card-clash/server/game"
 )
 
 // playMatch runs the handler's loop until the match asks to close, or the tick

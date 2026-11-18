@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rohan-more/Uno/server/game"
+	"github.com/rohan-more/card-clash/server/game"
 )
 
 // dealtMatch builds a started match with four seats: two humans, two bots.

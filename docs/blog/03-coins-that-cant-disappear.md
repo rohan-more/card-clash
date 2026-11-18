@@ -1,9 +1,9 @@
-# Uno in Unity/Nakama: coins that can't disappear
+# Card Clash: coins that can't disappear
 
 *Escrow, leavers, and what happens when the server dies*
 
-My online Uno is four players on a Unity client and a Nakama server written in
-Go, and every match is played for coins: each seat stakes 50, and the pot is
+Card Clash, my online card game with Uno-style rules, is four players on a
+Unity client and a Nakama server written in Go, and every match is played for coins: each seat stakes 50, and the pot is
 paid out by place. Once there's money on the table, every way a match can go
 wrong becomes a question about money. A player quits because they're losing.
 Someone's Wi-Fi drops. The server restarts with four stakes in the middle of a
@@ -64,4 +64,4 @@ is then retried.
 
 A rematch button, more than one stake level, a bot that doesn't just play the
 first legal card, and a deployment so friends can play. Code and notes:
-[rohan-more/Uno](https://github.com/rohan-more/Uno).
+[rohan-more/card-clash](https://github.com/rohan-more/card-clash).
