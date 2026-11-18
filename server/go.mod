@@ -1,4 +1,4 @@
-module github.com/rohan-more/Uno/server
+module github.com/rohan-more/card-clash/server
 
 go 1.26.5
 

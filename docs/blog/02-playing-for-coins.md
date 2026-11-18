@@ -1,9 +1,9 @@
-# Uno in Unity/Nakama: playing for coins
+# Card Clash: playing for coins
 
 *Stakes, payouts, and making losing cost something*
 
-My online Uno runs four players on a Unity client and a Nakama server written in
-Go. The server owns the game: it deals, checks every move and decides the
+Card Clash, my online card game with Uno-style rules, runs four players on a
+Unity client and a Nakama server written in Go. The server owns the game: it deals, checks every move and decides the
 winner. Winning didn't mean anything, though. Every match ended the same way,
 with a list of names. So I added coins.
 
@@ -64,4 +64,4 @@ genuine ones, not a debug shortcut that drifts out of step.
 The results screen is in: four rows with a gold, silver, bronze or slate ring
 around each avatar, and the coins counting up. Next up: a rematch button and
 more than one stake level. Code and notes:
-[rohan-more/Uno](https://github.com/rohan-more/Uno).
+[rohan-more/card-clash](https://github.com/rohan-more/card-clash).

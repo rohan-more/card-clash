@@ -1,4 +1,4 @@
-# Uno multiplayer: architecture
+# Card Clash: architecture
 
 One page on how the pieces fit, and what every script is for. The message
 contract itself lives in [server/PROTOCOL.md](server/PROTOCOL.md).
@@ -14,7 +14,7 @@ NakamaConnection  ──── HTTP/RPC ───▶ rpc.go        find_match, q
      │            ──── socket  ───▶ match.go      one authoritative match
      │                                  │          per game, 4 fixed seats
 LobbyView / MatchmakingPanel ◀── LOBBY_STATE      │  stakes.go: escrow
-MatchPresenter ──▶ MatchView ◀── GAME_STATE,    game/   pure Uno rules,
+MatchPresenter ──▶ MatchView ◀── GAME_STATE,    game/   pure card rules,
                ──▶ MatchSeatsView   EVENTS, ERROR,       no Nakama
                ──▶ ResultsView      REMOVED
 ```

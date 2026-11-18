@@ -1,6 +1,6 @@
 package main
 
-import "github.com/rohan-more/Uno/server/game"
+import "github.com/rohan-more/card-clash/server/game"
 
 // Opcodes, mirrored in the client's UnoOpCodes.cs and PROTOCOL.md.
 const (
