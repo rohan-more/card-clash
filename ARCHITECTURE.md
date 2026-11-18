@@ -69,15 +69,18 @@ which makes bug reports reproducible.
 | `Data/GameAssets.cs` | `IAssetService`. Loads the card and avatar libraries through Addressables |
 | `Network/UnoOpCodes.cs` | The opcode numbers from `PROTOCOL.md`, so both sides agree |
 | `Network/LobbyMessages.cs`, `Network/MatchMessages.cs` | The JSON shapes from `PROTOCOL.md`, filled by `JsonUtility` |
-| `Network/MatchSceneLoader.cs` | Lives with `NakamaConnection`. Opens MatchScene when the first `GAME_STATE` arrives, and goes back to the Lobby scene |
+| `Network/MatchSceneLoader.cs` | Lives with `NakamaConnection`. Opens MatchScene as soon as the first `GAME_STATE` arrives, and goes back to the Lobby scene |
 | `Network/MatchState.cs` | What this client believes the table looks like: your hand, seat counts, top card, whose turn. Built from a snapshot, mirrors the server's rules only to highlight cards |
-| `Network/MatchPresenter.cs` | Drives a networked match. Applies each server event to `MatchState`, then raises it for the views one at a time, waiting for `StepComplete()` so animations never overlap. Sends your plays, draws and passes. Resyncs on a gap or an error |
+| `Network/MatchPresenter.cs` | Drives a networked match. Applies each server event to `MatchState`, then raises it for the views one at a time, waiting for `StepComplete()` so animations never overlap. Sends your plays, draws and passes. Resyncs on a gap or an error. Starts the match intro on a fresh deal and holds events until it ends |
 | `UI/LobbyView.cs` | Home screen: name and avatar, the coin balance counting up and down, free coins, Play (off below the stake, or REJOIN MATCH) and Exit |
 | `UI/MatchmakingPanel.cs` | The 2×2 searching panel. Empty seats cycle avatars; a seat stops when the server says it's taken. Your seat is bottom-left and never scrolls |
 | `UI/ScreenFlow.cs` | Fades between the lobby and matchmaking panels via their CanvasGroups |
 | `UI/MatchView.cs` | Draws the match from `MatchPresenter`: hands, discard pile, draw deck, cards flying between them. Turns clicks into moves (asking for a wild's colour first), blocks double sends, shows your-turn cues and the "removed" screen |
 | `UI/MatchSeatsView.cs` | Seat nameplates: avatar, name, card count, the draining turn-timer ring, place at the end. Panel 0 is you, then the players after you in turn order |
 | `UI/ResultsView.cs`, `UI/RankView.cs` | The results screen: one row per player with place, avatar ring by place, name, cards left and coins counting up; then home |
+| `UI/MatchIntro.cs`, `UI/MatchIntroStep.cs` | The match intro: an ordered list of steps (set in the Inspector) played in the server's pause before the first turn, sped up if time is short |
+| `UI/PotIntroStep.cs`, `UI/DealIntroStep.cs` | The intro's steps: a stake over every hand flying to the centre, then the pot total; then the deal, a train of cards to every hand at once, and the starting card turning over |
+| `UI/FlyingSprites.cs` | A pool of images for things that fly many at once, like dealt cards and coins |
 | `UI/TurnCuesView.cs` | The arrows behind the piles, turning in the direction of play and flipping on a Reverse, and the avatar of whoever's on turn growing a little |
 | `UI/TurnBarView.cs` | The bar that slides in to say "Your Turn", "No card to play, Draw!" or "Not your turn" |
 | `UI/TableEventsView.cs` and the `*EventPanel` classes | Special-card call-outs everyone sees. `TableEventsView` picks the panel and queues them; each panel (`TableEventPanel` and its subclasses: Pop, Skip, Reverse, DrawCards, ColorChange) has its own art and animation |
@@ -135,7 +138,9 @@ client in step with the server.
 4. **Deal.** The server takes every human's stake (anyone short is replaced by
    a bot), deals 7 cards each and turns over a Number card, then sends every
    player their own `GAME_STATE`: their hand, and only card counts for everyone
-   else.
+   else. Each client plays its intro (the stakes going into the pot, then the
+   cards dealt to every hand) and sends `INTRO_DONE`. The first turn starts
+   once every connected player has, or after 8 seconds at most.
 5. **Play.** A client sends `PLAY_CARD`, `DRAW_CARD` or `PASS`. The server runs
    it through `game.Apply` and broadcasts the resulting `EVENTS` to everyone,
    with hidden cards stripped per player. An illegal move gets an `ERROR` back
