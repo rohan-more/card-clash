@@ -124,6 +124,21 @@ public class MatchState
         }
     }
 
+    /// <summary>
+    /// How many cards the deck held before the deal: what's left, plus every
+    /// hand, plus the starting card. The intro counts down from this.
+    /// </summary>
+    public int DeckBeforeDeal
+    {
+        get
+        {
+            int total = DeckCount + (TopCard != null ? 1 : 0);
+            foreach (var seat in Seats)
+                total += seat.CardCount;
+            return total;
+        }
+    }
+
     /// <summary>The seat this client is sitting in, or null before the first snapshot.</summary>
     public Seat You => SeatAt(YourSeat);
 

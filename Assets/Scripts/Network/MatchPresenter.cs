@@ -72,6 +72,28 @@ public class MatchPresenter : MonoBehaviour
     [Tooltip("Log every server event as it plays, to see where a match stalls.")]
     [SerializeField] private bool logEvents = true;
 
+    [Header("Intro (optional)")]
+    [Tooltip("Plays the pot and the deal while the server pauses before the first turn. " +
+             "Unset: the table simply appears, dealt.")]
+    [SerializeField] private MatchIntro intro;
+
+    [Tooltip("Give up on the intro this long after the first turn was due, so a stuck " +
+             "step can't hold the match.")]
+    [SerializeField] private float introGraceSeconds = 1f;
+
+    /// <summary>
+    /// True while the intro plays: views draw the table as it was before the
+    /// deal (empty hands, no starting card) and the intro shows each card land.
+    /// The snapshot is raised again once it ends, to draw the dealt table.
+    /// </summary>
+    public bool IntroPlaying { get; private set; }
+
+    // The intro is decided by the first snapshot in this scene, and only then:
+    // a later snapshot (a resync, a rejoin) never starts it
+    private bool _introDecided;
+    private bool _introDoneSent;
+    private float _stepTimeoutNow;
+
     /// <summary>The table as this client understands it.</summary>
     public MatchState State { get; } = new MatchState();
 
@@ -110,9 +132,14 @@ public class MatchPresenter : MonoBehaviour
 
     private void Update()
     {
-        if (_busy && waitForView && Time.time - _stepStarted > stepTimeout)
+        if (IntroPlaying && Time.time - _stepStarted > _stepTimeoutNow)
         {
-            Debug.LogWarning($"Match view never called StepComplete() within {stepTimeout}s; continuing");
+            Debug.LogWarning($"Match intro still running after {_stepTimeoutNow:0.0}s; showing the table");
+            EndIntro(stopIt: true);
+        }
+        else if (_busy && waitForView && Time.time - _stepStarted > _stepTimeoutNow)
+        {
+            Debug.LogWarning($"Match view never called StepComplete() within {_stepTimeoutNow}s; continuing");
             _busy = false;
         }
 
@@ -164,9 +191,77 @@ public class MatchPresenter : MonoBehaviour
         ClearPending(); // anything queued is older than this snapshot
         _busy = false;
 
+        // A snapshot in the middle of the intro replaces it: the table it
+        // draws is the truth, dealt or not
+        if (IntroPlaying)
+        {
+            IntroPlaying = false;
+            intro.Stop();
+        }
+
         State.ApplySnapshot(msg);
         _turnEndsAt = Time.time + (msg.turnWaitMs + msg.turnMsLeft) / 1000f;
+
+        // Only a fresh deal, with the server's pause still ahead, gets the
+        // intro; rejoining a match in progress goes straight to the table
+        float secondsToFirstTurn = msg.startsInMs / 1000f;
+        bool playIntro = !_introDecided && intro != null && intro.CanPlay(State, secondsToFirstTurn);
+        _introDecided = true;
+
+        IntroPlaying = playIntro;
         OnSnapshot?.Invoke(State);
+
+        if (playIntro)
+        {
+            // Events wait behind the intro like behind any other step, e.g. a
+            // first TURN_CHANGED that comes in while the last card is landing
+            _busy = true;
+            _stepStarted = Time.time;
+            _stepTimeoutNow = secondsToFirstTurn + introGraceSeconds;
+            intro.Play(State, secondsToFirstTurn, () => EndIntro(stopIt: false));
+        }
+        else if (!State.HasStarted)
+        {
+            // Nothing to play here: don't keep the table waiting for us
+            SendIntroDone();
+        }
+    }
+
+    /// <summary>The intro is over (or cut short): draw the dealt table and let events play.</summary>
+    private void EndIntro(bool stopIt)
+    {
+        if (!IntroPlaying)
+            return;
+
+        IntroPlaying = false;
+        if (stopIt)
+            intro.Stop();
+
+        _busy = false;
+        _stepTimeoutNow = stepTimeout;
+        OnSnapshot?.Invoke(State);
+        SendIntroDone();
+    }
+
+    /// <summary>
+    /// Tells the server this client is ready for the first turn. It starts once
+    /// every player has said so, or when its longest wait runs out.
+    /// </summary>
+    private async void SendIntroDone()
+    {
+        // Once is enough: a resync's snapshot would otherwise send it again
+        if (Connection == null || _introDoneSent)
+            return;
+        _introDoneSent = true;
+        try
+        {
+            await Connection.SendMatchStateAsync(UnoOpCodes.IntroDone);
+        }
+        catch (Exception e)
+        {
+            // The server stops waiting on its own; nothing more to do
+            Debug.LogWarning($"Couldn't say the intro was done: {e.Message}");
+        }
     }
 
     private void Enqueue(MatchEventsMsg batch)
@@ -220,6 +315,7 @@ public class MatchPresenter : MonoBehaviour
             {
                 _busy = true;
                 _stepStarted = Time.time;
+                _stepTimeoutNow = stepTimeout;
             }
 
             Apply(e, arrived);   // State is updated first, so views can read the result

@@ -90,7 +90,24 @@ public class MatchSeatsView : MonoBehaviour
         // from doing anything meaningful because the panels are inactive.
     }
 
-    private void HandleSnapshot(MatchState state) => Refresh();
+    // During the intro: how many cards each server seat has been dealt so far
+    private int[] introCounts;
+
+    private void HandleSnapshot(MatchState state)
+    {
+        // The intro deals the cards, so counts start at 0 and rise as they land
+        introCounts = presenter.IntroPlaying ? new int[state.Seats.Length] : null;
+        Refresh();
+    }
+
+    /// <summary>The intro's deal: shows how many cards have landed at a seat so far.</summary>
+    public void ShowIntroCardCount(int serverSeat, int count)
+    {
+        if (introCounts == null || serverSeat < 0 || serverSeat >= introCounts.Length)
+            return;
+        introCounts[serverSeat] = count;
+        Refresh();
+    }
 
     private void HandleTurnStarted(MatchPresenter.TurnStarted turn) => Refresh();
 
@@ -166,9 +183,12 @@ public class MatchSeatsView : MonoBehaviour
                 panel.avatar.sprite = avatars.Get(seat.Avatar);
 
             if (panel.cardCountText != null)
-                panel.cardCountText.text = seat.CardCount > maxShownCount
-                    ? $"{maxShownCount}+"
-                    : seat.CardCount.ToString();
+            {
+                int count = introCounts != null && seat.Index < introCounts.Length
+                    ? introCounts[seat.Index]
+                    : seat.CardCount;
+                panel.cardCountText.text = count > maxShownCount ? $"{maxShownCount}+" : count.ToString();
+            }
 
             if (panel.turnHighlight != null)
                 panel.turnHighlight.SetActive(seat.Index == state.CurrentSeat && !seat.HasFinished);
