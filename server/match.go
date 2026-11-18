@@ -54,7 +54,8 @@ type MatchState struct {
 	ageTicks      int             // ticks since the match was created
 	everHadHuman  bool            // so a brand new lobby is not closed before anyone can join
 	game          *game.GameState // nil until the cards are dealt
-	preMatchTicks int             // dealt table shown before the first turn
+	preMatchTicks int             // longest wait for the clients' intros before the first turn
+	introDone     [seatCount]bool // seats whose client said INTRO_DONE during that wait
 	turnTicks     int             // ticks left in the current turn
 	botThinkTicks int             // pause before a bot plays, so moves are watchable
 	gapTicks      int             // pause after any move, so turns do not race past
@@ -379,6 +380,7 @@ func (s *MatchState) startMatch(ctx context.Context, logger runtime.Logger, nk r
 	s.game = g
 	s.phase = phasePlaying
 	s.preMatchTicks = s.cfg.PreMatchMs / msPerTick
+	s.introDone = [seatCount]bool{}
 	s.labelDirty = true
 	logger.WithField("humans", s.humanCount()).WithField("seed", g.Seed).Info("match starting")
 
@@ -399,10 +401,13 @@ func (s *MatchState) tickPlaying(ctx context.Context, logger runtime.Logger, nk 
 	}
 
 	if s.preMatchTicks > 0 {
+		// Every client plays its intro (the pot, the deal) before the first
+		// turn: start once they all say they're done, or when the wait runs out
 		s.preMatchTicks--
-		if s.preMatchTicks > 0 {
+		if s.preMatchTicks > 0 && !s.introsDone() {
 			return
 		}
+		s.preMatchTicks = 0
 
 		s.beginTurn(0) // the pre-match pause was the pause
 		s.broadcastEvents(logger, dispatcher, []EventMsg{s.turnChangedEvent()})
@@ -615,6 +620,18 @@ func (s *MatchState) giveSeatToBot(ctx context.Context, logger runtime.Logger, n
 	}
 }
 
+// introsDone reports whether every connected player has finished their intro.
+// Bots and players who are away aren't waited for; preMatchTicks caps the
+// wait for anyone whose client never answers.
+func (s *MatchState) introsDone() bool {
+	for i, st := range s.seats {
+		if st.kind == KindHuman && st.connected && st.presence != nil && !s.introDone[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // handleMessages processes what clients sent this tick. Card play arrives with
 // the next chunk of work; until then only REQUEST_STATE does anything.
 func (s *MatchState) handleMessages(ctx context.Context, logger runtime.Logger, nk runtime.NakamaModule, dispatcher runtime.MatchDispatcher, messages []runtime.MatchData) {
@@ -635,6 +652,13 @@ func (s *MatchState) handleMessages(ctx context.Context, logger runtime.Logger, 
 
 		case OpExtendTurn:
 			s.handleExtendTurn(logger, dispatcher, seat, m)
+
+		case OpIntroDone:
+			// This client finished its intro, or had none to play. Late or
+			// repeated (a rejoin, a resync) changes nothing.
+			if s.phase == phasePlaying && s.preMatchTicks > 0 {
+				s.introDone[seat] = true
+			}
 
 		case OpLeaveMatch:
 			// Quitting on purpose: a bot takes the seat now rather than after

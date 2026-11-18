@@ -601,3 +601,83 @@ func TestDebugGiveCard_SendsEveryoneAFreshSnapshot(t *testing.T) {
 		t.Errorf("give card was refused: %+v", d.errors())
 	}
 }
+
+// ticksToFirstTurn runs the pre-match wait until the first TURN_CHANGED and
+// says how many ticks it took.
+func ticksToFirstTurn(t *testing.T, s *MatchState, d *fakeDispatcher) int {
+	t.Helper()
+	for tick := 1; tick <= 10000; tick++ {
+		s.tickPlaying(context.Background(), testLogger{}, nil, d)
+		if len(d.events(EvTurnChanged)) > 0 {
+			return tick
+		}
+	}
+	t.Fatal("the first turn never started")
+	return 0
+}
+
+func sendIntroDone(s *MatchState, d *fakeDispatcher, p fakePresence) {
+	s.handleMessages(context.Background(), testLogger{}, nil, d,
+		[]runtime.MatchData{fakeMatchData{fakePresence: p, opCode: OpIntroDone}})
+}
+
+func TestIntro_FirstTurnWaitsForEveryConnectedPlayer(t *testing.T) {
+	s := dealtMatch(t)
+	u0, u2 := fakePresence{userID: "u0"}, fakePresence{userID: "u2"}
+	s.seats[0].presence = u0
+	s.seats[2].presence = u2
+	d := &fakeDispatcher{}
+	ctx, logger := context.Background(), testLogger{}
+
+	sendIntroDone(s, d, u0)
+	for i := 0; i < 5; i++ {
+		s.tickPlaying(ctx, logger, nil, d)
+	}
+	if len(d.events(EvTurnChanged)) != 0 {
+		t.Fatal("play started while one player's intro was still running")
+	}
+
+	sendIntroDone(s, d, u2)
+	if got := ticksToFirstTurn(t, s, d); got != 1 {
+		t.Errorf("first turn %d ticks after the last intro finished, want 1", got)
+	}
+}
+
+func TestIntro_WaitIsCappedWhenAClientNeverAnswers(t *testing.T) {
+	s := dealtMatch(t)
+	s.seats[0].presence = fakePresence{userID: "u0"}
+	s.seats[2].presence = fakePresence{userID: "u2"}
+	d := &fakeDispatcher{}
+
+	want := s.cfg.PreMatchMs / msPerTick
+	if got := ticksToFirstTurn(t, s, d); got != want {
+		t.Errorf("first turn after %d ticks, want the full wait of %d", got, want)
+	}
+}
+
+func TestIntro_PlayersWhoAreAwayAreNotWaitedFor(t *testing.T) {
+	s := dealtMatch(t)
+	u0 := fakePresence{userID: "u0"}
+	s.seats[0].presence = u0
+	s.seats[2].presence = nil // dropped before the deal: their client can't answer
+	s.seats[2].connected = false
+	d := &fakeDispatcher{}
+
+	sendIntroDone(s, d, u0)
+	if got := ticksToFirstTurn(t, s, d); got != 1 {
+		t.Errorf("first turn after %d ticks, want 1: only the connected player counts", got)
+	}
+}
+
+func TestIntro_DoneAfterTheFirstTurnChangesNothing(t *testing.T) {
+	s := dealtMatch(t)
+	u0 := fakePresence{userID: "u0"}
+	s.seats[0].presence = u0
+	d := &fakeDispatcher{}
+	ticksToFirstTurn(t, s, d)
+
+	sendIntroDone(s, d, u0)
+	if len(d.errors()) != 0 {
+		t.Errorf("a late INTRO_DONE was answered with an error: %+v", d.errors())
+	}
+}
