@@ -219,7 +219,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5584280637370378806}
   - component: {fileID: 4990490914492901528}
-  - component: {fileID: 1941904079495393812}
   m_Layer: 5
   m_Name: PotIcon
   m_TagString: Untagged
@@ -258,35 +257,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4669067770581265966}
   m_CullTransparentMesh: 1
---- !u!114 &1941904079495393812
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4669067770581265966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fc6ef96f599c8b40af323e1f109356b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  seatsView: {fileID: 0}
-  cardProxy: {fileID: 0}
-  panelLayer: {fileID: 0}
-  stakePrefab: {fileID: 0}
-  potPrefab: {fileID: 0}
-  potPoint: {fileID: 0}
-  stakeFormat: '{0}'
-  potFormat: '{0}'
-  stakeFadeInSeconds: 0.25
-  stakeHoldSeconds: 0.4
-  flightSeconds: 0.45
-  fadeOutFrom: 0.6
-  potFadeInSeconds: 0.25
-  potHoldSeconds: 0.6
-  potFadeOutSeconds: 0.25
-  stakeArriveScale: 0.6
-  potStartScale: 0.8
 --- !u!1 &4669265939823882948
 GameObject:
   m_ObjectHideFlags: 0
