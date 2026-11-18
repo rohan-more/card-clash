@@ -88,11 +88,15 @@ has a made-up `userId` and is always `connected`, so clients see only
 
 1. The server deals: 7 cards per seat, then a Number card to start the discard
    pile (specials are reshuffled back, see the rules engine).
-2. Each seat receives its own `GAME_STATE` with `startsInMs` (3 s).
-3. The client holds on the full lobby screen, then shows the table with cards
-   already dealt. There is no dealing animation and no per-card event.
-4. After `preMatchMs` the server sends `TURN_CHANGED` for seat 0 and the turn
-   timer starts.
+2. Each seat receives its own `GAME_STATE` with `startsInMs`: the longest the
+   server will wait before the first turn (8 s).
+3. The client opens the table at once and plays its intro: the stakes flying
+   into the pot, then the deal. It's drawn from the snapshot alone; there is no
+   per-card event. When it's done, or straight away if it has none to play,
+   the client sends `INTRO_DONE`.
+4. Once every connected player has sent `INTRO_DONE`, or the wait runs out,
+   the server sends `TURN_CHANGED` for the first seat and the turn timer
+   starts. Bots and players who are away aren't waited for.
 
 **op 101 `GAME_STATE`** — personalized snapshot. Sent at match start, on
 reconnect, and in reply to `REQUEST_STATE`:
@@ -115,7 +119,7 @@ reconnect, and in reply to `REQUEST_STATE`:
   "drawnCardId": -1,
   "deckCount": 79,
   "turnMsLeft": 8000,
-  "startsInMs": 3000,
+  "startsInMs": 8000,
   "ranking": [],
   "seq": 0
 }
@@ -143,6 +147,7 @@ reconnect, and in reply to `REQUEST_STATE`:
 | 5 | `REQUEST_STATE` | `{}` | Any time; the server replies with `GAME_STATE` |
 | 6 | `EXTEND_TURN` | `{}` | Your turn, holding a drawn **wild** you are about to play, once per turn. Restarts your clock so choosing its color gets a full turn |
 | 7 | `LEAVE_MATCH` | `{}` | During play: quit now. A bot takes the seat at once and you get `REMOVED` with `LEFT`. In the lobby, just leave the match |
+| 8 | `INTRO_DONE` | `{}` | Before the first turn: your intro has finished, or you have none. The first turn starts once every connected player has sent it. Ignored at any other time |
 | 90 | `DEBUG_WIN` | `{ "seat": 2 }` | **Debug only.** During play: that seat (any, bot or human) wins now, as if it had played its last card |
 | 91 | `DEBUG_ONE_CARD` | `{ "seat": 2 }` | **Debug only.** During play: that seat's hand becomes one Wild; everyone gets a fresh `GAME_STATE` |
 | 92 | `DEBUG_GIVE_CARD` | `{ "seat": 2, "card": "DRAW_TWO" }` | **Debug only.** During play: one of that seat's cards is swapped for a `SKIP`, `REVERSE`, `DRAW_TWO`, `WILD` or `WILD_DRAW_FOUR`, in the colour in play when there is one; hand sizes don't change; everyone gets a fresh `GAME_STATE` |
@@ -285,7 +290,7 @@ allowed, e.g. `1.2`) and minutes. The server converts them on load.
   "lobbyCountdownSeconds": 12,
   "botJoinAtSecondsLeft": [8, 5, 3],
   "joinCutoffSeconds": 1,
-  "preMatchSeconds": 3,
+  "preMatchSeconds": 8,
   "turnSeconds": 8,
   "botThinkSeconds": 1.2,
   "turnGapSeconds": 0.8,

@@ -14,9 +14,6 @@ public class MatchSceneLoader : MonoBehaviour
     [SerializeField] private string matchSceneName = "MatchScene";
     [SerializeField] private string homeSceneName = "Lobby";
 
-    [Tooltip("Open the table this long before the first turn, so it appears just as play starts.")]
-    [SerializeField] private float sceneLoadAllowance = 0.5f;
-
     private bool loading;
 
     private static IConnectionService Connection => Services.Connection;
@@ -45,27 +42,20 @@ public class MatchSceneLoader : MonoBehaviour
         if (SceneManager.GetActiveScene().name == matchSceneName || loading)
             return; // already there or on the way; this is just a resync
 
-        // The server pauses before the first turn so everyone sees the full
-        // table of players: spend that pause on the matchmaking screen, not at
-        // the table. Rejoining mid-match has no pause and goes straight in.
-        var state = JsonUtility.FromJson<GameStateMsg>(json);
-        float wait = Mathf.Max(0f, state != null ? state.startsInMs / 1000f - sceneLoadAllowance : 0f);
-        Debug.Log($"[SCENE] Deal received; opening {matchSceneName} in {wait:0.0} s");
+        // Open the table straight away: the server pauses before the first
+        // turn, and the match intro (the pot and the deal) plays in that pause.
+        // Rejoining mid-match has no pause and no intro, and goes straight in too.
+        Debug.Log($"[SCENE] Deal received; opening {matchSceneName}");
 
-        // Let the menu music fade out during that pause, so the table opens
-        // quiet and its own track fades in (see SceneMusic)
+        // The menu music fades out as the table opens and its own track fades in (see SceneMusic)
         Services.Audio?.PlayMusic(Music.None);
-        StartCoroutine(LoadMatchScene(wait));
+        StartCoroutine(LoadMatchScene());
     }
 
-    private IEnumerator LoadMatchScene(float wait)
+    private IEnumerator LoadMatchScene()
     {
         loading = true;
-        if (wait > 0f)
-            yield return new WaitForSeconds(wait);
-
-        Debug.Log($"[SCENE] Opening {matchSceneName}");
-        SceneManager.LoadScene(matchSceneName);
+        yield return SceneManager.LoadSceneAsync(matchSceneName);
         loading = false;
     }
 

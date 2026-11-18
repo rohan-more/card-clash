@@ -25,7 +25,13 @@ public class TableEventsPreview : MonoBehaviour
     {
         if (!Debug.isDebugBuild)
         {
-            gameObject.SetActive(false);
+            // Hide only the preview's own controls: this component may sit on
+            // something that must stay, like the bar that holds your hand
+            if (eventDropdown != null)
+                eventDropdown.gameObject.SetActive(false);
+            if (playButton != null)
+                playButton.gameObject.SetActive(false);
+            enabled = false;
             return;
         }
 

@@ -9,7 +9,7 @@ player is allowed to see.
 
 > **Status: playable, in progress.** A full four-player match runs end to end
 > over the network: a loading screen, login, matchmaking, lobbies with bots,
-> dealing, turns with an 8-second timer, bots quietly taking over absent players,
+> an intro that fills the pot and deals the cards, turns with an 8-second timer, bots quietly taking over absent players,
 > reconnecting, matches played for coin stakes, a results screen, music and
 > card sounds, and call-outs for every special card. Rematch and deployment are
 > next; see the [roadmap](#roadmap).
@@ -141,6 +141,8 @@ cd server && go test ./...
 - [x] Results screen
 - [x] Music and card sounds; call-outs for special cards; turn direction and
       whose turn it is; a pace that's easy to follow
+- [x] Match intro: the stakes into the pot, then the deal; play waits for
+      every player's intro
 - [ ] Sounds for every moment, audio settings
 - [ ] Rematch, stake tiers
 - [ ] Stronger bot, deployment

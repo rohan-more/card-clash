@@ -175,6 +175,18 @@ public class MatchView : MonoBehaviour
         StopAllCoroutines();
         cardProxy.HideImmediate();
 
+        // The intro deals the cards: start from the table before the deal
+        if (presenter.IntroPlaying)
+        {
+            foreach (var seat in state.Seats)
+                ShowHandCount(seat.Index, 0);
+            discardPile.Clear();
+            if (drawPile != null)
+                drawPile.SetCount(state.DeckBeforeDeal);
+            RefreshControls();
+            return;
+        }
+
         foreach (var seat in state.Seats)
             RefreshHand(seat.Index);
 
@@ -709,6 +721,32 @@ public class MatchView : MonoBehaviour
             OnTimeout = KeepOnTimeout,
         }, () => choiceOpen = false);
     }
+
+    // ---- the intro (DealIntroStep draws the deal through these) ----
+
+    /// <summary>Where dealt cards leave from: the draw pile, or null if there is none.</summary>
+    public RectTransform DrawPilePoint => drawPile != null ? drawPile.Point : null;
+
+    /// <summary>Where the starting card lands.</summary>
+    public RectTransform DiscardPilePoint => (RectTransform)discardPile.transform;
+
+    /// <summary>Shows the first `count` cards dealt to a seat.</summary>
+    public void ShowDealt(int seat, int count) => ShowHandCount(seat, count);
+
+    public void ShowDeckCount(int count)
+    {
+        if (drawPile != null)
+            drawPile.SetCount(count);
+    }
+
+    /// <summary>Turns the starting card face up on the discard pile.</summary>
+    public void ShowStartingCard()
+    {
+        if (State.TopCard != null)
+            discardPile.SetTopCard(State.TopCard, FrontSprite(State.TopCard));
+    }
+
+    public Sprite FaceOf(CardInstance card) => FrontSprite(card);
 
     private HandView HandFor(int seat)
     {

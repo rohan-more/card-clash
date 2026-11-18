@@ -11,6 +11,7 @@ const (
 	OpRequestState int64 = 5
 	OpExtendTurn   int64 = 6
 	OpLeaveMatch   int64 = 7
+	OpIntroDone    int64 = 8
 
 	// client -> server, testing only: refused unless UNO_DEBUG_TOOLS=true
 	OpDebugWin      int64 = 90

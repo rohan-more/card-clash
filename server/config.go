@@ -33,7 +33,7 @@ type MatchConfig struct {
 	LobbyCountdownMs int   // from the first player joining
 	BotJoinAtMsLeft  []int // bots fill empty seats at these marks
 	JoinCutoffMs     int   // no new players once this little time is left
-	PreMatchMs       int   // dealt table shown before the first turn
+	PreMatchMs       int   // longest wait before the first turn, while clients play their intro
 
 	// Turns
 	TurnMs     int // per turn, before the server plays it safe
@@ -76,7 +76,7 @@ func DefaultMatchConfig() MatchConfig {
 		LobbyCountdownMs:  12000,
 		BotJoinAtMsLeft:   []int{8000, 5000, 3000},
 		JoinCutoffMs:      1000,
-		PreMatchMs:        3000,
+		PreMatchMs:        8000, // a cap: play starts as soon as every client's intro is done
 		TurnMs:            8000,
 		BotThinkMs:        1200,
 		TurnGapMs:         800,

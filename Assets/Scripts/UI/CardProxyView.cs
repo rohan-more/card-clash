@@ -41,6 +41,17 @@ public class CardProxyView : MonoBehaviour
     }
 
     /// <summary>
+    /// Where cards fly to for a seat, e.g. for the intro's deal; null if the
+    /// seat has no entry.
+    /// </summary>
+    public RectTransform PointFor(PlayerSeat seat)
+    {
+        if (seatLookup == null)
+            return null;
+        return seatLookup.TryGetValue(seat, out var point) ? point : null;
+    }
+
+    /// <summary>
     /// Initializes the proxy at a given anchored position.
     /// </summary>
     public void Show(Sprite sprite, PlayerSeat seat)

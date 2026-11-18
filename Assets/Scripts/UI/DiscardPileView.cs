@@ -16,5 +16,12 @@ public class DiscardPileView : MonoBehaviour
         topCardImage.enabled = true;
         canvasGroup.alpha = 1;
     }
+
+    /// <summary>An empty pile, e.g. before the deal turns over the starting card.</summary>
+    public void Clear()
+    {
+        topCard = null;
+        topCardImage.enabled = false;
+    }
 }
 
