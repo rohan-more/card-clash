@@ -1,7 +1,7 @@
 # Match intro
 
-Status: **code written, not yet wired into MatchScene.** Planned 2026-11-11,
-built 2026-11-18. See [Setting it up](#setting-it-up) for the scene work.
+Status: **built and working.** Planned 2026-11-11, built 2026-11-18. The scene
+setup is described in [Setting it up](#setting-it-up).
 
 ## Why
 
