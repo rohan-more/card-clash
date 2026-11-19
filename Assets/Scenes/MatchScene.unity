@@ -213,6 +213,7 @@ MonoBehaviour:
   - {fileID: 1566636097873221459, guid: 10b0f8c30acf7874c9b25cca9e7e086b, type: 3}
   - {fileID: 1999292703334701063, guid: f3d00a52c11f4c04d935d786b0c63caa, type: 3}
   - {fileID: 3899253596982569395, guid: 61771370c9aa8a84b8dd927334dcf4f8, type: 3}
+  - {fileID: 1563936001698678814, guid: a712c9f36c8bcf94c94bd81c5b17ae54, type: 3}
 --- !u!114 &347976232
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1353,10 +1354,22 @@ PrefabInstance:
       propertyPath: seatsView
       value: 
       objectReference: {fileID: 771139323}
+    - target: {fileID: 1962782594755605964, guid: fd042ae2bc997d94990b7823e18756e0, type: 3}
+      propertyPath: presenter
+      value: 
+      objectReference: {fileID: 771139322}
     - target: {fileID: 2431770587527171612, guid: fd042ae2bc997d94990b7823e18756e0, type: 3}
       propertyPath: m_Name
       value: OverlayCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 3911637524501509206, guid: fd042ae2bc997d94990b7823e18756e0, type: 3}
+      propertyPath: presenter
+      value: 
+      objectReference: {fileID: 771139322}
+    - target: {fileID: 3911637524501509206, guid: fd042ae2bc997d94990b7823e18756e0, type: 3}
+      propertyPath: seatsView
+      value: 
+      objectReference: {fileID: 771139323}
     - target: {fileID: 4820695515388420417, guid: fd042ae2bc997d94990b7823e18756e0, type: 3}
       propertyPath: actionBus
       value: 
@@ -1469,6 +1482,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fab6d3aa7774f4341b2940e4d0865e1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3746081568958446954 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3911637524501509206, guid: fd042ae2bc997d94990b7823e18756e0, type: 3}
+  m_PrefabInstance: {fileID: 3746081568958446952}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c10fe41a3dea994bb4226e670881060, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7279880883740293824
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1501,6 +1525,18 @@ PrefabInstance:
       propertyPath: view
       value: 
       objectReference: {fileID: 292621629}
+    - target: {fileID: 5993789847415727902, guid: 547e97e4db852524782b10d1e3cce485, type: 3}
+      propertyPath: library
+      value: 
+      objectReference: {fileID: 11400000, guid: a4288dfdefba1c447bb2116f60227640, type: 2}
+    - target: {fileID: 5993789847415727902, guid: 547e97e4db852524782b10d1e3cce485, type: 3}
+      propertyPath: emoteView
+      value: 
+      objectReference: {fileID: 3746081568958446954}
+    - target: {fileID: 5993789847415727902, guid: 547e97e4db852524782b10d1e3cce485, type: 3}
+      propertyPath: presenter
+      value: 
+      objectReference: {fileID: 771139322}
     - target: {fileID: 6952543039475227709, guid: 547e97e4db852524782b10d1e3cce485, type: 3}
       propertyPath: actionBus
       value: 
