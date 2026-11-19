@@ -177,3 +177,18 @@ public static class SeatKinds
     public const string Bot = "bot";
     public const string Empty = "empty";
 }
+
+/// <summary>Opcode 9, client to server: the emote to show everyone else. See the Emote enum.</summary>
+[Serializable]
+public class SendEmoteReq
+{
+    public int emote;
+}
+
+/// <summary>Opcode 105: another player (or a bot) sent an emote. Not part of EVENTS: no seq, no step.</summary>
+[Serializable]
+public class EmoteMsg
+{
+    public int seat;
+    public int emote;
+}
