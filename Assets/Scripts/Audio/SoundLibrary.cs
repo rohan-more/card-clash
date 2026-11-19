@@ -18,6 +18,7 @@ public enum Sfx
     Lose,
     Coins,
     ButtonClick,
+    Emote,       // someone's emote pops up; keep it soft
 }
 
 /// <summary>Background tracks. None fades the music out.</summary>
