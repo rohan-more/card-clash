@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87e5e6ef3b8d914ca4ca62d275a1718, type: 3}
+  m_Name: EmoteLibrary
+  m_EditorClassIdentifier: 
+  entries:
+  - emote: 0
+    sprite: {fileID: -1180376702, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 1
+    sprite: {fileID: 1042708803, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 2
+    sprite: {fileID: 396205802, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 3
+    sprite: {fileID: -1944307380, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 4
+    sprite: {fileID: 1379043742, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 5
+    sprite: {fileID: 1363514605, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 6
+    sprite: {fileID: -1398505389, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}
+  - emote: 7
+    sprite: {fileID: 1148003979, guid: edcbd9eb4105f6740b7d56df451c407d, type: 3}

@@ -5,13 +5,29 @@ using UnityEngine;
 /// <summary>Popups for the current scene, by way of Services.Popups.</summary>
 public interface IPopupService
 {
-    void Show(PopupType type, object context = null, Action onCompleted = null);
+    /// <summary>
+    /// Opens a popup, replacing the one showing, unless the one showing has a
+    /// higher priority: then nothing opens and it returns false.
+    /// </summary>
+    bool Show(PopupType type, object context = null, Action onCompleted = null);
+
+    /// <summary>Whether Show would open this popup right now.</summary>
+    bool CanShow(PopupType type);
+
+    /// <summary>The popup showing, or None.</summary>
+    PopupType ActiveType { get; }
+
     void CloseActive();
 }
 
 /// <summary>
 /// Shows one popup at a time from its prefab list. One per scene that needs
 /// popups; it registers itself as Services.Popups and leaves with the scene.
+///
+/// Each popup has a priority (set on its prefab). A popup opens over one of
+/// the same or a lower priority and replaces it, but is refused over a higher
+/// one: so a light popup like the emote picker can never close a choice the
+/// game is waiting for, while that choice always replaces the emote picker.
 /// </summary>
 public class PopupManager : MonoBehaviour, IPopupService
 {
@@ -19,6 +35,8 @@ public class PopupManager : MonoBehaviour, IPopupService
 
     private readonly Dictionary<PopupType, PopupView> prefabLookup = new();
     private PopupView activePopup;
+
+    public PopupType ActiveType => activePopup != null ? activePopup.Type : PopupType.None;
 
     private void Awake()
     {
@@ -44,13 +62,24 @@ public class PopupManager : MonoBehaviour, IPopupService
         }
     }
 
-    public void Show(PopupType type, object context = null, Action onCompleted = null)
+    public bool CanShow(PopupType type)
+    {
+        if (!prefabLookup.TryGetValue(type, out var prefab))
+            return false;
+        return activePopup == null || prefab.Priority >= activePopup.Priority;
+    }
+
+    public bool Show(PopupType type, object context = null, Action onCompleted = null)
     {
         if (!prefabLookup.TryGetValue(type, out var prefab))
         {
             Debug.LogError($"Popup prefab not registered: {type}");
-            return;
+            return false;
         }
+
+        // A more important popup is waiting for an answer: leave it alone
+        if (activePopup != null && prefab.Priority < activePopup.Priority)
+            return false;
 
         CloseActive();
 
@@ -60,10 +89,13 @@ public class PopupManager : MonoBehaviour, IPopupService
         instance.Show(context, () =>
             {
                 onCompleted?.Invoke();
-                Destroy(instance.gameObject);
-                activePopup = null;
+                instance.DestroyWhenClosed(); // after its exit animation
+                // onCompleted may have opened the next popup: keep that one
+                if (activePopup == instance)
+                    activePopup = null;
             }
         );
+        return true;
     }
 
     private void OnDestroy()

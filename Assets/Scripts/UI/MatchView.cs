@@ -70,6 +70,9 @@ public class MatchView : MonoBehaviour
     // A move we sent that the server hasn't answered yet; blocks double sends
     private bool awaitingServer;
 
+    // You've played or drawn this turn (the server hasn't moved the turn on yet)
+    private bool movedThisTurn;
+
     // The server took our seat; ignore everything from here on
     private bool removed;
 
@@ -169,6 +172,7 @@ public class MatchView : MonoBehaviour
     private void HandleSnapshot(MatchState state)
     {
         awaitingServer = false;
+        movedThisTurn = false; // a draw this turn shows as DrawnCardId instead
         animationVersion++;
         drawAnimating = false;
         hoveringCard = null;
@@ -202,7 +206,10 @@ public class MatchView : MonoBehaviour
     private void HandleCardPlayed(MatchPresenter.CardPlayed played)
     {
         if (played.Seat == State.YourSeat)
+        {
             awaitingServer = false;
+            movedThisTurn = true;
+        }
 
         // You chose Play: the card drops from where it hovers, not from your hand
         if (hoveringCard != null && played.Seat == State.YourSeat && played.Card?.InstanceId == hoveringCard.InstanceId)
@@ -245,7 +252,10 @@ public class MatchView : MonoBehaviour
     private void HandleCardsDrawn(MatchPresenter.CardsDrawn drawn)
     {
         if (drawn.Seat == State.YourSeat)
+        {
             awaitingServer = false;
+            movedThisTurn = true;
+        }
 
         StartCoroutine(AnimateDraw(drawn));
     }
@@ -274,10 +284,12 @@ public class MatchView : MonoBehaviour
 
         drawAnimating = true;
         ShowHandCount(drawn.Seat, startCount);
+        seatsView.ShowLandingCount(drawn.Seat, startCount); // the number rises as cards land
         RefreshControls();
 
         // Split the time between the cards, so a +4 takes about as long as one card
         var to = seatsView.SeatPositionFor(drawn.Seat);
+        var hand = HandPoint(drawn.Seat); // into the hand itself, not the seat's avatar
         float speed = Mathf.Max(1f, n * (0.6f / Mathf.Max(0.1f, drawDuration)));
 
         for (int i = 0; i < n; i++)
@@ -288,7 +300,10 @@ public class MatchView : MonoBehaviour
                 : database.CardBack;
 
             bool landed = false;
-            if (drawPile != null)
+            if (drawPile != null && hand != null)
+                cardProxy.Fly(sprite, drawPile.Point, hand, speed, () => landed = true,
+                              growToFullSize: drawn.Seat == State.YourSeat); // yours grow so you can read them
+            else if (drawPile != null)
                 cardProxy.Fly(sprite, drawPile.Point, to, speed, () => landed = true);
             else
                 cardProxy.Fly(sprite, PlayerSeat.Deck, to, speed, () => landed = true);
@@ -301,8 +316,10 @@ public class MatchView : MonoBehaviour
                 yield break;
 
             ShowHandCount(drawn.Seat, startCount + i + 1);
+            seatsView.ShowLandingCount(drawn.Seat, startCount + i + 1);
         }
 
+        seatsView.EndLandingCount(drawn.Seat);
         cardProxy.HideImmediate();
         if (drawPile != null)
             drawPile.SetCount(State.DeckCount);
@@ -323,7 +340,8 @@ public class MatchView : MonoBehaviour
         RefreshControls();
 
         bool done = false;
-        cardProxy.Fly(database.CardBack, drawPile.Point, drawnCardHover, 1f, () => done = true);
+        cardProxy.Fly(database.CardBack, drawPile.Point, drawnCardHover, 1f, () => done = true,
+                      growToFullSize: true); // it's yours: full size by the time it turns over
         drawPile.SetCount(State.DeckCount);
         while (!done)
             yield return null;
@@ -351,7 +369,11 @@ public class MatchView : MonoBehaviour
         RefreshControls(); // no longer your turn: closes Play / Keep
 
         bool landed = false;
-        cardProxy.FlyFromHere(seatsView.SeatPositionFor(State.YourSeat), 1f, () => landed = true);
+        var yourHand = HandPoint(State.YourSeat);
+        if (yourHand != null)
+            cardProxy.FlyFromHere(yourHand, 1f, () => landed = true);
+        else
+            cardProxy.FlyFromHere(seatsView.SeatPositionFor(State.YourSeat), 1f, () => landed = true);
         while (!landed)
             yield return null;
         if (version != animationVersion)
@@ -390,6 +412,7 @@ public class MatchView : MonoBehaviour
     private void FinishTurnStarted(MatchPresenter.TurnStarted turn)
     {
         awaitingServer = false;
+        movedThisTurn = false;
 
         // The turn moved on while we were picking a wild colour (timed out)
         if (turn.Seat != State.YourSeat && pendingWild != null)
@@ -701,10 +724,12 @@ public class MatchView : MonoBehaviour
         if (yourTurnIndicator != null)
             yourTurnIndicator.SetActive(yourTurn);
 
-        // Nothing to play and you haven't drawn yet: point at the Draw button
+        // Nothing to play and you haven't moved yet: point at the draw pile. Not
+        // once you've played or drawn: the turn is still yours until the server
+        // moves it on, and what's left in your hand may not match the new top card
         if (drawHint != null)
-            drawHint.SetActive(yourTurn && !presenter.MustPlayDrawnOrPass && presenter.PlayableCards().Count == 0
-                               && !OwesCardsWithNoAnswer());
+            drawHint.SetActive(yourTurn && !movedThisTurn && !drawAnimating && !presenter.MustPlayDrawnOrPass
+                               && presenter.PlayableCards().Count == 0 && !OwesCardsWithNoAnswer());
     }
 
     private void OpenDrawnChoice()
@@ -726,6 +751,12 @@ public class MatchView : MonoBehaviour
 
     /// <summary>Where dealt cards leave from: the draw pile, or null if there is none.</summary>
     public RectTransform DrawPilePoint => drawPile != null ? drawPile.Point : null;
+
+    /// <summary>
+    /// Where cards dealt or drawn to a seat land: the middle of that seat's
+    /// hand. Null if this screen has no hand for it.
+    /// </summary>
+    public RectTransform HandPoint(int seat) => HandFor(seat) != null ? (RectTransform)HandFor(seat).transform : null;
 
     /// <summary>Where the starting card lands.</summary>
     public RectTransform DiscardPilePoint => (RectTransform)discardPile.transform;

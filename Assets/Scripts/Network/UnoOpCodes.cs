@@ -12,6 +12,7 @@ public static class UnoOpCodes
     public const long LeaveMatch = 7;    // {} quit now: a bot takes the seat
     public const long ExtendTurn = 6;    // {} once a turn, before choosing a drawn wild's colour
     public const long IntroDone = 8;     // {} the match intro has finished (or there was none): ready for the first turn
+    public const long SendEmote = 9;     // {"emote":3} see the Emote enum; the server passes it to everyone else
 
     // client -> server, testing only: refused unless the server's debug tools are on
     public const long DebugWin = 90;     // {"seat":2} that seat wins now
@@ -24,4 +25,5 @@ public static class UnoOpCodes
     public const long Events = 102;      // what one action caused, in order
     public const long Error = 103;       // rejected action, sender only
     public const long Removed = 104;     // you lost your seat, sender only
+    public const long Emote = 105;       // {"seat":2,"emote":3} someone else sent an emote; not an EVENTS step
 }

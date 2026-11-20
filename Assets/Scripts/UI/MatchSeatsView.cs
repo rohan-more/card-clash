@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -93,11 +94,33 @@ public class MatchSeatsView : MonoBehaviour
     // During the intro: how many cards each server seat has been dealt so far
     private int[] introCounts;
 
+    // While cards fly into a hand: how many have landed, by server seat. The
+    // state already has the final count, which would show before the cards do.
+    private readonly Dictionary<int, int> landingCounts = new Dictionary<int, int>();
+
     private void HandleSnapshot(MatchState state)
     {
         // The intro deals the cards, so counts start at 0 and rise as they land
         introCounts = presenter.IntroPlaying ? new int[state.Seats.Length] : null;
+        landingCounts.Clear(); // a snapshot redraws every hand in full
         Refresh();
+    }
+
+    /// <summary>
+    /// A draw is flying in: show this many cards for the seat until
+    /// EndLandingCount, instead of the state's count.
+    /// </summary>
+    public void ShowLandingCount(int serverSeat, int count)
+    {
+        landingCounts[serverSeat] = count;
+        Refresh();
+    }
+
+    /// <summary>The draw has landed: back to the state's count.</summary>
+    public void EndLandingCount(int serverSeat)
+    {
+        if (landingCounts.Remove(serverSeat))
+            Refresh();
     }
 
     /// <summary>The intro's deal: shows how many cards have landed at a seat so far.</summary>
@@ -184,10 +207,16 @@ public class MatchSeatsView : MonoBehaviour
 
             if (panel.cardCountText != null)
             {
-                int count = introCounts != null && seat.Index < introCounts.Length
+                bool dealing = introCounts != null && seat.Index < introCounts.Length;
+                int count = dealing
                     ? introCounts[seat.Index]
-                    : seat.CardCount;
-                panel.cardCountText.text = count > maxShownCount ? $"{maxShownCount}+" : count.ToString();
+                    : landingCounts.TryGetValue(seat.Index, out var landed) ? landed : seat.CardCount;
+
+                // Blank, not 0, until the deal's first card lands
+                if (dealing && count == 0)
+                    panel.cardCountText.text = string.Empty;
+                else
+                    panel.cardCountText.text = count > maxShownCount ? $"{maxShownCount}+" : count.ToString();
             }
 
             if (panel.turnHighlight != null)

@@ -78,7 +78,8 @@ public class CardProxyView : MonoBehaviour
     public void MoveTo(System.Action onComplete = null)
     {
         StopMove();
-        moveRoutine = StartCoroutine(MoveAtConstantSpeed(centerTransform.anchoredPosition, 1f, onComplete));
+        // Onto the discard pile: end at the proxy's own size, which is the pile's
+        moveRoutine = StartCoroutine(MoveAtConstantSpeed(centerTransform.anchoredPosition, 1f, onComplete, 1f));
     }
 
     /// <summary>
@@ -103,10 +104,11 @@ public class CardProxyView : MonoBehaviour
     /// </summary>
     public void Fly(Sprite sprite, RectTransform from, PlayerSeat to, float speedMultiplier, System.Action onComplete)
     {
-        Fly(sprite, AnchoredPositionOf(from), to, speedMultiplier, onComplete);
+        Fly(sprite, AnchoredPositionOf(from), to, speedMultiplier, onComplete, ScaleToMatch(from));
     }
 
-    private void Fly(Sprite sprite, Vector2 startPos, PlayerSeat to, float speedMultiplier, System.Action onComplete)
+    private void Fly(Sprite sprite, Vector2 startPos, PlayerSeat to, float speedMultiplier, System.Action onComplete,
+                     float startScale = 1f)
     {
         StopMove();
 
@@ -118,7 +120,7 @@ public class CardProxyView : MonoBehaviour
         }
 
         cardImage.sprite = sprite;
-        rt.localScale = Vector3.one;
+        rt.localScale = Vector3.one * startScale;
         rt.localRotation = Quaternion.identity;
         rt.anchoredPosition = startPos;
         canvasGroup.alpha = 1f;
@@ -126,17 +128,42 @@ public class CardProxyView : MonoBehaviour
         moveRoutine = StartCoroutine(MoveAtConstantSpeed(end.anchoredPosition, speedMultiplier, onComplete));
     }
 
-    /// <summary>Flies a card from one object on screen to another, e.g. the deck to a hover point.</summary>
-    public void Fly(Sprite sprite, RectTransform from, RectTransform to, float speedMultiplier, System.Action onComplete)
+    /// <summary>
+    /// Flies a card from one object on screen to another, e.g. the deck to a
+    /// hand. It leaves at the size of the object it flies from and keeps it,
+    /// unless growToFullSize: then it grows to its usual size on the way (your
+    /// own draws, so you can read them).
+    /// </summary>
+    public void Fly(Sprite sprite, RectTransform from, RectTransform to, float speedMultiplier, System.Action onComplete,
+                    bool growToFullSize = false)
     {
         StopMove();
 
         cardImage.sprite = sprite;
-        rt.localScale = Vector3.one;
+        rt.localScale = Vector3.one * ScaleToMatch(from);
         rt.localRotation = Quaternion.identity;
         rt.anchoredPosition = AnchoredPositionOf(from);
         canvasGroup.alpha = 1f;
 
+        float? endScale = growToFullSize ? 1f : (float?)null;
+        moveRoutine = StartCoroutine(MoveAtConstantSpeed(AnchoredPositionOf(to), speedMultiplier, onComplete, endScale));
+    }
+
+    // The scale that makes the card as tall on screen as the given object, e.g.
+    // the draw pile, so a drawn card leaves looking like the deck's top card
+    private float ScaleToMatch(RectTransform target)
+    {
+        if (target == null)
+            return 1f;
+        float ours = rt.rect.height * rt.lossyScale.y / Mathf.Max(0.0001f, Mathf.Abs(rt.localScale.y));
+        float theirs = target.rect.height * target.lossyScale.y;
+        return ours > 0f && theirs > 0f ? theirs / ours : 1f;
+    }
+
+    /// <summary>Flies the card already showing, from wherever it is now, to an object on screen, e.g. your hand.</summary>
+    public void FlyFromHere(RectTransform to, float speedMultiplier, System.Action onComplete)
+    {
+        StopMove();
         moveRoutine = StartCoroutine(MoveAtConstantSpeed(AnchoredPositionOf(to), speedMultiplier, onComplete));
     }
 
@@ -155,14 +182,18 @@ public class CardProxyView : MonoBehaviour
         moveRoutine = StartCoroutine(MoveAtConstantSpeed(end.anchoredPosition, speedMultiplier, onComplete));
     }
 
-    /// <summary>Turns the card over in place: squeezes it flat, swaps the face, opens it again.</summary>
+    /// <summary>
+    /// Turns the card over in place: squeezes it flat, swaps the face, opens it
+    /// again, keeping whatever size it is.
+    /// </summary>
     public void Flip(Sprite newFace, float duration, System.Action onComplete)
     {
         KillFlip();
+        float width = rt.localScale.y;
         flipTween = DOTween.Sequence()
             .Append(rt.DOScaleX(0f, duration * 0.5f).SetEase(Ease.InQuad))
             .AppendCallback(() => cardImage.sprite = newFace)
-            .Append(rt.DOScaleX(1f, duration * 0.5f).SetEase(Ease.OutQuad))
+            .Append(rt.DOScaleX(width, duration * 0.5f).SetEase(Ease.OutQuad))
             .OnComplete(() => onComplete?.Invoke());
     }
 
@@ -178,19 +209,27 @@ public class CardProxyView : MonoBehaviour
 
     // Takes as long as the distance at moveSpeed would, but eases out and in,
     // so the eye catches where a card leaves from and where it lands.
-    private IEnumerator MoveAtConstantSpeed(Vector2 targetAnchoredPos, float speedMultiplier, System.Action onComplete)
+    // endScale: the size to grow or shrink to on the way; null keeps the size
+    // it started at (a card from the deck stays deck-sized all the way)
+    private IEnumerator MoveAtConstantSpeed(Vector2 targetAnchoredPos, float speedMultiplier, System.Action onComplete,
+                                            float? endScale = null)
     {
         Vector2 from = rt.anchoredPosition;
+        float fromScale = rt.localScale.y;
+        float toScale = endScale ?? fromScale;
         float seconds = Vector2.Distance(from, targetAnchoredPos) / Mathf.Max(1f, moveSpeed * speedMultiplier);
         seconds = Mathf.Max(seconds, minMoveSeconds / Mathf.Max(1f, speedMultiplier));
 
         for (float t = 0f; t < seconds; t += Time.deltaTime)
         {
-            rt.anchoredPosition = Vector2.LerpUnclamped(from, targetAnchoredPos, Mathf.SmoothStep(0f, 1f, t / seconds));
+            float k = Mathf.SmoothStep(0f, 1f, t / seconds);
+            rt.anchoredPosition = Vector2.LerpUnclamped(from, targetAnchoredPos, k);
+            rt.localScale = Vector3.one * Mathf.Lerp(fromScale, toScale, k);
             yield return null;
         }
 
         rt.anchoredPosition = targetAnchoredPos;
+        rt.localScale = Vector3.one * toScale;
         onComplete?.Invoke();
     }
 
@@ -221,7 +260,8 @@ public class CardProxyView : MonoBehaviour
         if (flipTween != null && flipTween.IsActive())
             flipTween.Kill();
         flipTween = null;
+        // Undo a half-done squeeze, keeping the card's size (the flip only touches x)
         if (rt != null)
-            rt.localScale = Vector3.one;
+            rt.localScale = Vector3.one * rt.localScale.y;
     }
 }

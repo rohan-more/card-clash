@@ -229,6 +229,41 @@ RectTransform:
   m_AnchoredPosition: {x: -394, y: -277}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &700364790724571979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3710489029393573652}
+  m_Layer: 5
+  m_Name: MyEmote
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3710489029393573652
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700364790724571979}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6831626970056820233}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -395, y: 307}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &742254095951613559
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,6 +957,7 @@ RectTransform:
   - {fileID: 1961123308448101224}
   - {fileID: 7776384735063848318}
   - {fileID: 4252887288906667623}
+  - {fileID: 6831626970056820233}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1232,9 +1268,9 @@ MonoBehaviour:
   actionBus: {fileID: 0}
   label: {fileID: 8966214772794388685}
   content: {fileID: 3103839212343320185}
-  yourTurnText: Your Turn
-  mustDrawText: No card to play, Draw!
-  notYourTurnText: Not your turn
+  yourTurnText: Your Turn!
+  mustDrawText: Draw Card!
+  notYourTurnText: Not your turn!
   entrance: 0
   exitToRight: 0
   inSeconds: 0.35
@@ -1929,6 +1965,50 @@ RectTransform:
   m_AnchoredPosition: {x: 326, y: -277}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &4662086923342182850
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7999373268118907715}
+  - component: {fileID: 1146921676913984742}
+  m_Layer: 5
+  m_Name: EmoteOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &7999373268118907715
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4662086923342182850}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6831626970056820233}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1146921676913984742
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4662086923342182850}
+  m_CullTransparentMesh: 1
 --- !u!1 &4722149919171481474
 GameObject:
   m_ObjectHideFlags: 0
@@ -2232,8 +2312,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.2313, y: -289}
-  m_SizeDelta: {x: 811.896, y: 117.4698}
+  m_AnchoredPosition: {x: 6.3091, y: -289}
+  m_SizeDelta: {x: 622.3243, y: 117.4698}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5763896818436542500
 CanvasRenderer:
@@ -3190,6 +3270,98 @@ MonoBehaviour:
   stagger: 0.06
   fanEase: 27
   labelPopSeconds: 0.25
+--- !u!1 &6658230911092317226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6831626970056820233}
+  - component: {fileID: 5689752885650217570}
+  - component: {fileID: 3911637524501509206}
+  - component: {fileID: 1962782594755605964}
+  m_Layer: 5
+  m_Name: EmotePanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6831626970056820233
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6658230911092317226}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7999373268118907715}
+  - {fileID: 3710489029393573652}
+  m_Father: {fileID: 5291530149366166106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5689752885650217570
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6658230911092317226}
+  m_CullTransparentMesh: 1
+--- !u!114 &3911637524501509206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6658230911092317226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c10fe41a3dea994bb4226e670881060, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  presenter: {fileID: 0}
+  seatsView: {fileID: 0}
+  library: {fileID: 11400000, guid: a4288dfdefba1c447bb2116f60227640, type: 2}
+  panelLayer: {fileID: 7999373268118907715}
+  size: {x: 150, y: 150}
+  offset: {x: 0, y: 0}
+  yourEmotePoint: {fileID: 3710489029393573652}
+  popInSeconds: 0.25
+  wobbleDegrees: 12
+  wobbleSeconds: 0.5
+  holdSeconds: 1.5
+  fadeOutSeconds: 0.3
+--- !u!114 &1962782594755605964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6658230911092317226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dd89fc2fb3e93b4f97cb297835809f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  presenter: {fileID: 0}
+  emoteView: {fileID: 3911637524501509206}
+  laughOnDrawFour: 1
+  cryOnDrawPenalty: 1
+  angryWhenSkipped: 1
+  thinkWhenSlow: 1
+  coolOnWin: 1
+  thinkAfterFraction: 0.5
 --- !u!1 &6803718731106875739
 GameObject:
   m_ObjectHideFlags: 0
