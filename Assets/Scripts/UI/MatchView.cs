@@ -284,6 +284,7 @@ public class MatchView : MonoBehaviour
 
         drawAnimating = true;
         ShowHandCount(drawn.Seat, startCount);
+        seatsView.ShowLandingCount(drawn.Seat, startCount); // the number rises as cards land
         RefreshControls();
 
         // Split the time between the cards, so a +4 takes about as long as one card
@@ -315,8 +316,10 @@ public class MatchView : MonoBehaviour
                 yield break;
 
             ShowHandCount(drawn.Seat, startCount + i + 1);
+            seatsView.ShowLandingCount(drawn.Seat, startCount + i + 1);
         }
 
+        seatsView.EndLandingCount(drawn.Seat);
         cardProxy.HideImmediate();
         if (drawPile != null)
             drawPile.SetCount(State.DeckCount);
