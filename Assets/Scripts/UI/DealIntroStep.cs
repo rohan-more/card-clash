@@ -139,7 +139,10 @@ public class DealIntroStep : MatchIntroStep
 
     private void DealOne(MatchState state, int seat, int index, Vector3 from, Vector2 size, float speed)
     {
-        var point = cardProxy.PointFor(seatsView.SeatPositionFor(seat));
+        // Into the hand itself; the proxy's seat point only if there's no hand
+        var point = matchView.HandPoint(seat);
+        if (point == null)
+            point = cardProxy.PointFor(seatsView.SeatPositionFor(seat));
         bool yours = seat == state.YourSeat;
         Sprite face = yours && index < state.Hand.Count ? matchView.FaceOf(state.Hand[index]) : null;
 
