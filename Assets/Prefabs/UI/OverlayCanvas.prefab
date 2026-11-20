@@ -3357,7 +3357,8 @@ MonoBehaviour:
   presenter: {fileID: 0}
   emoteView: {fileID: 3911637524501509206}
   laughOnDrawFour: 1
-  cryOnDrawingFour: 1
+  cryOnDrawPenalty: 1
+  angryWhenSkipped: 1
   thinkWhenSlow: 1
   coolOnWin: 1
   thinkAfterFraction: 0.5

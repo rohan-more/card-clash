@@ -24,7 +24,8 @@ kind of moment a demo video needs. Most online card games have them.
   | When | Emote | On |
   |---|---|---|
   | plays a Draw Four | `Laugh` | the player |
-  | ends up drawing a Draw Four (after any stacking) | `Crying` | that player |
+  | ends up drawing from a Draw Two or Draw Four (after any stacking) | `Crying` | that player |
+  | gets skipped | `Angry` | that player |
   | half their turn gone without a move | `Thinking` | that player, once a turn |
   | wins | `Cool` | the winner |
 

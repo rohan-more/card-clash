@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Emotes the game shows for players, on cue:
 /// - Laugh on whoever plays a Draw Four;
-/// - Crying on whoever ends up drawing it (after any stacking);
+/// - Crying on whoever ends up drawing from a Draw Two or Draw Four (after
+///   any stacking);
+/// - Angry on whoever gets skipped;
 /// - Thinking on a player who has used half their turn without moving;
 /// - Cool on the winner.
 ///
@@ -22,7 +25,10 @@ public class EmoteReactions : MonoBehaviour
 
     [Header("Which")]
     [SerializeField] private bool laughOnDrawFour = true;
-    [SerializeField] private bool cryOnDrawingFour = true;
+    [Tooltip("Crying when someone draws what a Draw Two or Draw Four (or a stack of them) left them owing.")]
+    [FormerlySerializedAs("cryOnDrawingFour")]
+    [SerializeField] private bool cryOnDrawPenalty = true;
+    [SerializeField] private bool angryWhenSkipped = true;
     [SerializeField] private bool thinkWhenSlow = true;
     [SerializeField] private bool coolOnWin = true;
 
@@ -50,6 +56,7 @@ public class EmoteReactions : MonoBehaviour
         presenter.OnSnapshot += HandleSnapshot;
         presenter.OnCardPlayed += HandleCardPlayed;
         presenter.OnCardsDrawn += HandleCardsDrawn;
+        presenter.OnPlayerSkipped += HandlePlayerSkipped;
         presenter.OnTurnStarted += HandleTurnStarted;
         presenter.OnGameOver += HandleGameOver;
     }
@@ -61,6 +68,7 @@ public class EmoteReactions : MonoBehaviour
         presenter.OnSnapshot -= HandleSnapshot;
         presenter.OnCardPlayed -= HandleCardPlayed;
         presenter.OnCardsDrawn -= HandleCardsDrawn;
+        presenter.OnPlayerSkipped -= HandlePlayerSkipped;
         presenter.OnTurnStarted -= HandleTurnStarted;
         presenter.OnGameOver -= HandleGameOver;
     }
@@ -90,15 +98,21 @@ public class EmoteReactions : MonoBehaviour
         if (drawn.Seat == thinkingSeat)
             thinkingSeat = -1; // they moved
 
-        // Drawing what they owed, and what they owed came from a Draw Four
-        // (the card on top is the last one stacked)
+        // Drawing what they owed from a Draw Two or Draw Four (a stack is
+        // always one kind, and the top card says which)
         bool payingDebt = drawn.Seat == owingSeat && drawn.Count >= owedCards;
         if (payingDebt)
         {
             owingSeat = -1;
-            if (cryOnDrawingFour && IsDrawFour(State.TopCard))
+            if (cryOnDrawPenalty && IsDrawCard(State.TopCard))
                 React(drawn.Seat, Emote.Crying);
         }
+    }
+
+    private void HandlePlayerSkipped(int seat)
+    {
+        if (angryWhenSkipped)
+            React(seat, Emote.Angry);
     }
 
     private void HandleTurnStarted(MatchPresenter.TurnStarted turn)
@@ -150,10 +164,18 @@ public class EmoteReactions : MonoBehaviour
         emoteView.ShowReaction(seat, emote);
     }
 
-    private static bool IsDrawFour(CardInstance card)
+    private static bool IsDrawFour(CardInstance card) => TypeOf(card) == CardType.WildDrawFour;
+
+    private static bool IsDrawCard(CardInstance card)
+    {
+        var type = TypeOf(card);
+        return type == CardType.DrawTwo || type == CardType.WildDrawFour;
+    }
+
+    private static CardType? TypeOf(CardInstance card)
     {
         var cards = Services.Assets != null ? Services.Assets.Cards : null;
         var def = card != null && cards != null ? card.GetDefinition(cards) : null;
-        return def != null && def.Type == CardType.WildDrawFour;
+        return def?.Type;
     }
 }
