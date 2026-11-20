@@ -70,6 +70,9 @@ public class MatchView : MonoBehaviour
     // A move we sent that the server hasn't answered yet; blocks double sends
     private bool awaitingServer;
 
+    // You've played or drawn this turn (the server hasn't moved the turn on yet)
+    private bool movedThisTurn;
+
     // The server took our seat; ignore everything from here on
     private bool removed;
 
@@ -169,6 +172,7 @@ public class MatchView : MonoBehaviour
     private void HandleSnapshot(MatchState state)
     {
         awaitingServer = false;
+        movedThisTurn = false; // a draw this turn shows as DrawnCardId instead
         animationVersion++;
         drawAnimating = false;
         hoveringCard = null;
@@ -202,7 +206,10 @@ public class MatchView : MonoBehaviour
     private void HandleCardPlayed(MatchPresenter.CardPlayed played)
     {
         if (played.Seat == State.YourSeat)
+        {
             awaitingServer = false;
+            movedThisTurn = true;
+        }
 
         // You chose Play: the card drops from where it hovers, not from your hand
         if (hoveringCard != null && played.Seat == State.YourSeat && played.Card?.InstanceId == hoveringCard.InstanceId)
@@ -245,7 +252,10 @@ public class MatchView : MonoBehaviour
     private void HandleCardsDrawn(MatchPresenter.CardsDrawn drawn)
     {
         if (drawn.Seat == State.YourSeat)
+        {
             awaitingServer = false;
+            movedThisTurn = true;
+        }
 
         StartCoroutine(AnimateDraw(drawn));
     }
@@ -390,6 +400,7 @@ public class MatchView : MonoBehaviour
     private void FinishTurnStarted(MatchPresenter.TurnStarted turn)
     {
         awaitingServer = false;
+        movedThisTurn = false;
 
         // The turn moved on while we were picking a wild colour (timed out)
         if (turn.Seat != State.YourSeat && pendingWild != null)
@@ -701,10 +712,12 @@ public class MatchView : MonoBehaviour
         if (yourTurnIndicator != null)
             yourTurnIndicator.SetActive(yourTurn);
 
-        // Nothing to play and you haven't drawn yet: point at the Draw button
+        // Nothing to play and you haven't moved yet: point at the draw pile. Not
+        // once you've played or drawn: the turn is still yours until the server
+        // moves it on, and what's left in your hand may not match the new top card
         if (drawHint != null)
-            drawHint.SetActive(yourTurn && !presenter.MustPlayDrawnOrPass && presenter.PlayableCards().Count == 0
-                               && !OwesCardsWithNoAnswer());
+            drawHint.SetActive(yourTurn && !movedThisTurn && !drawAnimating && !presenter.MustPlayDrawnOrPass
+                               && presenter.PlayableCards().Count == 0 && !OwesCardsWithNoAnswer());
     }
 
     private void OpenDrawnChoice()

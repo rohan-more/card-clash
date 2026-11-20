@@ -734,7 +734,7 @@ MonoBehaviour:
   popupSafetyMargin: 0.75
   passButton: {fileID: 0}
   yourTurnIndicator: {fileID: 0}
-  drawHint: {fileID: 0}
+  drawHint: {fileID: 7279880883740293825}
   removedPanel: {fileID: 0}
   removedText: {fileID: 0}
   removedReturnDelay: 3
@@ -1634,6 +1634,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 547e97e4db852524782b10d1e3cce485, type: 3}
+--- !u!1 &7279880883740293825 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5393591514576529336, guid: 547e97e4db852524782b10d1e3cce485, type: 3}
+  m_PrefabInstance: {fileID: 7279880883740293824}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
