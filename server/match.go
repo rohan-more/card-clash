@@ -62,8 +62,9 @@ type MatchState struct {
 	turnExtended  bool            // EXTEND_TURN already used this turn
 	closeTicks    int             // ticks left before a finished match shuts down
 
-	missedTurns  [seatCount]int // consecutive timeouts, reset by acting in time
-	closeRequest bool           // set when the match should end on this tick
+	missedTurns        [seatCount]int // consecutive timeouts, reset by acting in time
+	emoteCooldownTicks [seatCount]int // per seat: ticks until it may emote again; 0 = it can
+	closeRequest       bool           // set when the match should end on this tick
 
 	countdownTicks int  // ticks left in the lobby; -1 until the first player joins
 	nextBotMark    int  // index into cfg.BotJoinAtMsLeft
@@ -275,6 +276,8 @@ func (s *MatchState) loop(ctx context.Context, logger runtime.Logger, nk runtime
 		logger.Info("match finished, closing")
 		return false
 	}
+
+	s.tickEmoteCooldowns()
 
 	s.handleMessages(ctx, logger, nk, dispatcher, messages)
 
@@ -666,6 +669,9 @@ func (s *MatchState) handleMessages(ctx context.Context, logger runtime.Logger, 
 			if s.phase == phasePlaying {
 				s.giveSeatToBot(ctx, logger, nk, dispatcher, seat, RemovedLeft)
 			}
+
+		case OpSendEmote:
+			s.handleEmote(logger, dispatcher, seat, m)
 
 		case OpDebugWin, OpDebugOneCard, OpDebugGiveCard:
 			s.handleDebug(ctx, logger, dispatcher, m)
