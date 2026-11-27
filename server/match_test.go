@@ -148,6 +148,29 @@ func TestSanitizeConfig(t *testing.T) {
 	}
 }
 
+func TestSanitizeConfig_EmoteCooldown(t *testing.T) {
+	def := DefaultMatchConfig()
+	logger := testLogger{}
+
+	bad := def
+	bad.EmoteCooldownMs = -1000
+
+	got := sanitize(bad, def, logger)
+
+	if got.EmoteCooldownMs != def.EmoteCooldownMs {
+		t.Errorf("bad emote cooldown was not replaced: %d", got.EmoteCooldownMs)
+	}
+
+	zero := def
+	zero.EmoteCooldownMs = 0
+
+	gotZero := sanitize(zero, def, logger)
+
+	if gotZero.EmoteCooldownMs != 0 {
+		t.Errorf("a cooldown of 0 should be kept, got %d", gotZero.EmoteCooldownMs)
+	}
+}
+
 func TestSanitizeConfig_SortsBotMarks(t *testing.T) {
 	def := DefaultMatchConfig()
 	in := def
