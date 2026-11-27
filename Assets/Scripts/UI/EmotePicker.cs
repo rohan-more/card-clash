@@ -29,8 +29,8 @@ public class EmotePicker : MonoBehaviour
 
     [Header("Rules")]
     [SerializeField] private float cooldownSeconds = 2f;
-    [Tooltip("Off until the server handles SEND_EMOTE: your emote then only shows on your own " +
-             "screen. Sending it to a server that doesn't know it would get an error and a resync.")]
+    [Tooltip("Sends your emote to the server, which passes it to the other players. Off: it " +
+             "only shows on your own screen, e.g. against a server without SEND_EMOTE (op 9).")]
     [SerializeField] private bool sendToServer;
 
     private float cooldownEndsAt;
