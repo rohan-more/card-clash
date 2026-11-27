@@ -143,8 +143,8 @@ cd server && go test ./...
       whose turn it is; a pace that's easy to follow
 - [x] Match intro: the stakes into the pot, then the deal; play waits for
       every player's intro
-- [ ] Emotes: a picker, and reactions on cue (a laugh at a +4, tears on
-      drawing one); the client is done, the server relay is next
+- [x] Emotes: a picker, and reactions on cue (a laugh at a +4, tears on
+      drawing one); the server passes picked emotes to the other players
 - [ ] Sounds for every moment, audio settings
 - [ ] Rematch, stake tiers
 - [ ] Stronger bot, deployment

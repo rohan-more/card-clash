@@ -1,7 +1,7 @@
 # Emotes: plan
 
-Status: **client built, server not yet.** Planned 2026-11-18. The Unity side
-(`EmoteLibrary`, `EmoteView`, `EmotePicker`) works locally; the Go side is next.
+Status: **done.** Planned 2026-11-18; client merged 2026-11-20, server relay
+2026-11-27 (`server/emote.go`, `SEND_EMOTE` and `EMOTE` in `server/PROTOCOL.md`).
 
 ## Why
 
@@ -138,14 +138,15 @@ Muting a player's emotes (tap their avatar), and emotes on the results screen.
 4. **Emote button.** By your hand, an emote **button** (an icon, e.g. a
    smiley), with an optional child Image set to Filled / Radial 360 for the
    cooldown. Add **EmotePicker** to it: Presenter, Emote View, Library, Open
-   Button, Cooldown Fill. Leave **Send To Server off** until the server
-   handles `SEND_EMOTE`.
+   Button, Cooldown Fill. Tick **Send To Server**, and keep Cooldown Seconds
+   at the server's `emoteCooldownSeconds` (2).
 5. **Reactions.** Add **EmoteReactions** next to EmoteView: Presenter, Emote
    View. Each reaction has a tickbox; Think After Fraction sets when Thinking
    shows (0.5 is halfway through the turn).
 6. **Sound (optional).** In the SoundLibrary, add an entry for `Emote` with a
    soft pop.
 
-**Testing without the server:** your own picks show above your emote button,
-and the reactions show for everyone, bots included.
+**Testing:** run two clients in one match. A pick shows above your emote button
+at once and over your seat in the other window. With **Send To Server** off,
+picks stay on your own screen; the reactions show either way, bots included.
 
