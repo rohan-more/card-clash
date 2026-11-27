@@ -387,8 +387,8 @@ MonoBehaviour:
   library: {fileID: 0}
   openButton: {fileID: 2263571684465306389}
   cooldownFill: {fileID: 0}
-  cooldownSeconds: 5
-  sendToServer: 0
+  cooldownSeconds: 2
+  sendToServer: 1
 --- !u!1 &859358755825893034
 GameObject:
   m_ObjectHideFlags: 0

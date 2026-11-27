@@ -12,6 +12,7 @@ const (
 	OpExtendTurn   int64 = 6
 	OpLeaveMatch   int64 = 7
 	OpIntroDone    int64 = 8
+	OpSendEmote    int64 = 9
 
 	// client -> server, testing only: refused unless UNO_DEBUG_TOOLS=true
 	OpDebugWin      int64 = 90
@@ -24,6 +25,7 @@ const (
 	OpEvents     int64 = 102
 	OpError      int64 = 103
 	OpRemoved    int64 = 104
+	OpEmote      int64 = 105
 )
 
 // Seat kinds as the client sees them.

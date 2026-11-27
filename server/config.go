@@ -51,6 +51,8 @@ type MatchConfig struct {
 	EmptyLobbyGraceMs int // how long a new lobby waits for its first player
 	NoHumansCloseMs   int // close once no human has been connected this long
 	PostGameCloseMs   int // results screen time after GAME_OVER
+
+	EmoteCooldownMs int // how long a player must wait before sending another emote
 }
 
 // matchConfigStored is config/match as it appears in the console.
@@ -68,6 +70,7 @@ type matchConfigStored struct {
 	EmptyLobbyGraceSeconds float64   `json:"emptyLobbyGraceSeconds"`
 	NoHumansCloseSeconds   float64   `json:"noHumansCloseSeconds"`
 	PostGameCloseSeconds   float64   `json:"postGameCloseSeconds"`
+	EmoteCooldownSeconds   float64   `json:"emoteCooldownSeconds"` // how long a player must wait before sending another emote in seconds
 }
 
 // DefaultMatchConfig returns the values the game ships with.
@@ -86,6 +89,7 @@ func DefaultMatchConfig() MatchConfig {
 		EmptyLobbyGraceMs: 10000,
 		NoHumansCloseMs:   10000,
 		PostGameCloseMs:   30000,
+		EmoteCooldownMs:   2000,
 	}
 }
 
@@ -111,6 +115,7 @@ func (c MatchConfig) stored() matchConfigStored {
 		EmptyLobbyGraceSeconds: seconds(c.EmptyLobbyGraceMs),
 		NoHumansCloseSeconds:   seconds(c.NoHumansCloseMs),
 		PostGameCloseSeconds:   seconds(c.PostGameCloseMs),
+		EmoteCooldownSeconds:   seconds(c.EmoteCooldownMs),
 	}
 }
 
@@ -133,6 +138,7 @@ func (s matchConfigStored) config() MatchConfig {
 		EmptyLobbyGraceMs: millis(s.EmptyLobbyGraceSeconds),
 		NoHumansCloseMs:   millis(s.NoHumansCloseSeconds),
 		PostGameCloseMs:   millis(s.PostGameCloseSeconds),
+		EmoteCooldownMs:   millis(s.EmoteCooldownSeconds),
 	}
 }
 
@@ -172,6 +178,7 @@ func sanitize(c, def MatchConfig, logger runtime.Logger) MatchConfig {
 	c.EmptyLobbyGraceMs = fix("emptyLobbyGraceSeconds", c.EmptyLobbyGraceMs, def.EmptyLobbyGraceMs, false)
 	c.NoHumansCloseMs = fix("noHumansCloseSeconds", c.NoHumansCloseMs, def.NoHumansCloseMs, false)
 	c.PostGameCloseMs = fix("postGameCloseSeconds", c.PostGameCloseMs, def.PostGameCloseMs, false)
+	c.EmoteCooldownMs = fix("emoteCooldownSeconds", c.EmoteCooldownMs, def.EmoteCooldownMs, true)
 
 	// Bot marks must be inside the countdown, and later marks come first.
 	marks := make([]int, 0, len(c.BotJoinAtMsLeft))

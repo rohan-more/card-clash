@@ -148,6 +148,7 @@ reconnect, and in reply to `REQUEST_STATE`:
 | 6 | `EXTEND_TURN` | `{}` | Your turn, holding a drawn **wild** you are about to play, once per turn. Restarts your clock so choosing its color gets a full turn |
 | 7 | `LEAVE_MATCH` | `{}` | During play: quit now. A bot takes the seat at once and you get `REMOVED` with `LEFT`. In the lobby, just leave the match |
 | 8 | `INTRO_DONE` | `{}` | Before the first turn: your intro has finished, or you have none. The first turn starts once every connected player has sent it. Ignored at any other time |
+| 9 | `SEND_EMOTE` | `{ "emote": 3 }` | During play, from the first turn on (not during the intro). `emote` is 0–7, the client's `Emote` enum. One per `emoteCooldownSeconds` per seat. The other players get `EMOTE`; the sender doesn't, since its client shows the emote itself. Anything else is **dropped without an `ERROR`** |
 | 90 | `DEBUG_WIN` | `{ "seat": 2 }` | **Debug only.** During play: that seat (any, bot or human) wins now, as if it had played its last card |
 | 91 | `DEBUG_ONE_CARD` | `{ "seat": 2 }` | **Debug only.** During play: that seat's hand becomes one Wild; everyone gets a fresh `GAME_STATE` |
 | 92 | `DEBUG_GIVE_CARD` | `{ "seat": 2, "card": "DRAW_TWO" }` | **Debug only.** During play: one of that seat's cards is swapped for a `SKIP`, `REVERSE`, `DRAW_TWO`, `WILD` or `WILD_DRAW_FOUR`, in the colour in play when there is one; hand sizes don't change; everyone gets a fresh `GAME_STATE` |
@@ -226,6 +227,18 @@ before they are kicked (or the match closes, if they were the last human):
 
 Nothing else follows. The client should say why and go back to the home screen.
 
+**op 105 `EMOTE`** — to every other connected player when a seat's
+`SEND_EMOTE` is accepted; never to the sender, and bots have no client:
+
+```json
+{ "seat": 2, "emote": 3 }
+```
+
+Show that emote over that seat. Both fields are always present, `0` included
+(seat 0, or emote 0, Laugh). An emote changes nothing in the game, so it has no
+`seq` and is not part of `EVENTS`: a client that misses one doesn't need to
+resync.
+
 ## 7. Timers, timeouts and bots
 
 - **Owing cards with nothing to stack** (a pending +2/+4 and no matching draw
@@ -299,7 +312,8 @@ allowed, e.g. `1.2`) and minutes. The server converts them on load.
   "missedTurnsForBot": 3,
   "emptyLobbyGraceSeconds": 10,
   "noHumansCloseSeconds": 10,
-  "postGameCloseSeconds": 30
+  "postGameCloseSeconds": 30,
+  "emoteCooldownSeconds": 2
 }
 ```
 
@@ -307,6 +321,9 @@ After every move the server pauses before the next turn, so every client can
 show it: `turnGapSeconds`, plus `eventPauseSeconds` for each banner a special
 card shows (one for Skip, Reverse, Draw Two or Wild; two for Wild Draw Four,
 which also changes the colour), plus `perCardDrawSeconds` for each card drawn. A bot thinks, or a player's clock starts, only after the pause.
+
+`emoteCooldownSeconds` is how long a seat must wait between emotes. `0` means
+no cooldown; a negative value falls back to the default.
 
 **`config` / `economy`**: coins. Read on every wallet request, so edits apply
 at once.
@@ -444,4 +461,4 @@ last server.
 ## 12. Not in v1
 
 Private rooms and room codes, matchmaking by skill, rematch, spectating,
-reconnecting after a bot takeover, chat and emotes, stats and leaderboards.
+reconnecting after a bot takeover, chat, stats and leaderboards.
